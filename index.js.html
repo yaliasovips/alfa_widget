@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Alfabank Widget</title>
+    <script
+            id="alfa-payment-script"
+            type="text/javascript"
+            src="/index.js">
+    </script>
+    <style>
+        #alfa-payment-button {
+            width: 100px;
+            height: 100px;
+            border: 1px solid tomato;
+        }
+    </style>
+</head>
+<body>
+<div id="alfa-payment-button"
+     data-token='replace_this_to_merchant_token'
+     data-client-info-selector='.clientInfo'
+     data-amount-selector='.amount'
+     data-version='1.0'
+     data-order-number-selector='.orderNumber'
+     data-language='ru'
+     data-stages='1'
+     data-return-url='http://store.ru/success_url.html'
+     data-fail-url='http://store.ru/fail_url.html'
+     data-amount-format='.amountFormat'
+     data-description-selector='.order'
+     data-email-selector='alyasovyan@gmail.com'
+></div>
+
+<div class="element">
+    <label>Укажите Ваше имя:</label>
+    <input class='clientInfo' type='text' value='Имя Имя Имя' />
+</div>
+<div class="element">
+    <label>Укажите amount:</label>
+    <input class='amount' type='text' value='123' />
+</div>
+<div class="element">
+    <label>Укажите orderNumber:</label>
+    <input class='orderNumber' type='text' value='Номер заказа' />
+</div>
+<div class="element">
+    <label>Укажите amountFormat:</label>
+    <input class='amountFormat' type='text' value='rubli' />
+</div>
+<div class="element">
+    <label>Укажите order:</label>
+    <input class='order' type='text' value='order' />
+</div>
+</body>
+</html>
