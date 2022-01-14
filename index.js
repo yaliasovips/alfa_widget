@@ -34,7 +34,7 @@ async function widgetScript() {
         },
         cost: {
             // must be a number conforming to the specified constraints && should not be empty
-            amount: formatCostAmount(alfaPaymentData.amountSelector),
+            amount: Number(alfaPaymentData.amountSelector),
         },
         customer: {
             name: alfaPaymentData.clientInfoSelector,
@@ -46,15 +46,19 @@ async function widgetScript() {
 
     // testing request to register (https://test.egopay.ru/send_link/api/register)
     try {
-        const request = await fetch('https://test.egopay.ru/send_link/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            mode: 'cors',
-            body: JSON.stringify(dataToSend)
-        })
-        const response = await request.json();
+        if(!dataToSend.order.token && dataToSend.order.token !== '') {
+            const request = await fetch('https://test.egopay.ru/send_link/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'cors',
+                body: JSON.stringify(dataToSend)
+            })
+            const response = await request.json();
+        } else {
+            throw new Error('Token is not defined');
+        }
     } catch(error) {
         console.error(error);
         throw new Error(error);
