@@ -19,9 +19,6 @@ async function widgetScript() {
             if(findedSelector === null) {
                 console.error(`Element with ${findedSelector} class not found`);
                 throw new Error(`Element with ${findedSelector} class not found`);
-            } else if (!findedSelector.value) {
-                console.error(`Element with ${findedSelector} class haven't value`);
-                throw new Error(`Element with ${findedSelector} class haven't value`);
             } else {
                 alfaPaymentData[element] = findedSelector.value
             }
@@ -37,7 +34,7 @@ async function widgetScript() {
         },
         cost: {
             // must be a number conforming to the specified constraints && should not be empty
-            amount: Number(alfaPaymentData.amountSelector),
+            amount: formatCostAmount(alfaPaymentData.amountSelector),
         },
         customer: {
             name: alfaPaymentData.clientInfoSelector,
@@ -46,17 +43,21 @@ async function widgetScript() {
         description: {}
     }
 
-    const request = await fetch('https://test.egopay.ru/send_link/api/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        mode: 'cors',
-        body: JSON.stringify(dataToSend)
-    })
 
-    const response = await request.json();
-    console.log('>>response', response);
-
+    // testing request to register (https://test.egopay.ru/send_link/api/register)
+    try {
+        const request = await fetch('https://test.egopay.ru/send_link/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            mode: 'cors',
+            body: JSON.stringify(dataToSend)
+        })
+        const response = await request.json();
+    } catch(error) {
+        console.error(error);
+        throw new Error(error);
+    }
 
 }
