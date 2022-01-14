@@ -45,8 +45,8 @@ async function widgetScript() {
 
 
     // testing request to register (https://test.egopay.ru/send_link/api/register)
-    try {
-        if(!dataToSend.order.token && dataToSend.order.token !== '') {
+    if(!dataToSend.order.token && dataToSend.order.token !== '') {
+        try {
             const request = await fetch('https://test.egopay.ru/send_link/api/register', {
                 method: 'POST',
                 headers: {
@@ -56,12 +56,12 @@ async function widgetScript() {
                 body: JSON.stringify(dataToSend)
             })
             const response = await request.json();
-        } else {
-            throw new Error('Token is not defined');
+        } catch(error) {
+            console.error(error);
+            throw new Error(error);
         }
-    } catch(error) {
-        console.error(error);
-        throw new Error(error);
+    } else {
+        throw new Error('Token is not defined');
     }
 
 }
