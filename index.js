@@ -15,37 +15,37 @@ async function widgetScript() {
     // #find keys ob object, if value start with "."
     for(const element in alfaPaymentData) {
         if(alfaPaymentData[element].indexOf('.') === 0) {
-            const findedSelector = document.querySelector(alfaPaymentData[element]);
-            if(findedSelector === null) {
-                console.error(`Element with ${findedSelector} class not found`);
-                throw new Error(`Element with ${findedSelector} class not found`);
+            const foundSelector = document.querySelector(alfaPaymentData[element]);
+            if(foundSelector === null) {
+                console.error(`Element with ${foundSelector} class not found`);
+                throw new Error(`Element with ${foundSelector} class not found`);
             } else {
-                alfaPaymentData[element] = findedSelector.value
+                alfaPaymentData[element] = foundSelector.value
             }
         }
     }
 
-    const dataToSend = {
+    const requestData = {
         order: {
-            // INTEGER && should not be empty
-            token: alfaPaymentData.token,
+            // STRING && should not be empty
+            token: alfaPaymentData?.token,
             // must be shorter than or equal to 128 characters && STRING && should not be empty
-            number: alfaPaymentData.orderNumberSelector,
+            number: alfaPaymentData?.orderNumberSelector,
         },
         cost: {
             // must be a number conforming to the specified constraints && should not be empty
-            amount: Number(alfaPaymentData.amountSelector),
+            amount: Number(alfaPaymentData?.amountSelector),
         },
         customer: {
-            name: alfaPaymentData.clientInfoSelector,
-            email: alfaPaymentData.emailSelector,
+            name: alfaPaymentData?.clientInfoSelector,
+            email: alfaPaymentData?.emailSelector,
         },
-        description: {}
+        description: {},
+        postdata: {},
     }
 
-
     // testing request to register (https://test.egopay.ru/send_link/api/register)
-    if(!dataToSend.order.token && dataToSend.order.token !== '') {
+    if(!requestData.order.token && requestData.order.token !== '') {
         try {
             const request = await fetch('https://test.egopay.ru/send_link/api/register', {
                 method: 'POST',
@@ -53,7 +53,7 @@ async function widgetScript() {
                     'Content-Type': 'application/json'
                 },
                 mode: 'cors',
-                body: JSON.stringify(dataToSend)
+                body: JSON.stringify(requestData)
             })
             const response = await request.json();
         } catch(error) {
@@ -63,5 +63,4 @@ async function widgetScript() {
     } else {
         throw new Error('Token is not defined');
     }
-
 }
