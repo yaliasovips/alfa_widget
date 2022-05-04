@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // # find widget <button>
     const alfaPaymentButton = document.getElementById('alfa-payment-button');
     const body = document.body;
-    console.log('>>body', body)
 
     // # generate payment button
     const paymentButton = document.createElement("button");
