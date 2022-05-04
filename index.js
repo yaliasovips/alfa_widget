@@ -20,19 +20,35 @@ async function widgetScript() {
         }
     }
 
+    // #rename keys
+    alfaPaymentData['orderNumber'] = alfaPaymentData['orderNumberSelector'];
+    delete alfaPaymentData['orderNumberSelector'];
+    alfaPaymentData['amount'] = alfaPaymentData['amountSelector'];
+    delete alfaPaymentData['amountSelector'];
+    alfaPaymentData['description'] = alfaPaymentData['descriptionSelector'];
+    delete alfaPaymentData['descriptionSelector'];
+    alfaPaymentData['email'] = alfaPaymentData['addEmailSelector'];
+    delete alfaPaymentData['addEmailSelector'];
+    alfaPaymentData['phone'] = alfaPaymentData['addPhoneSelector'];
+    delete alfaPaymentData['addPhoneSelector'];
+    alfaPaymentData['clientInfo'] = alfaPaymentData['clientInfoSelector'];
+    delete alfaPaymentData['clientInfoSelector'];
+
     // #transform amount
-    alfaPaymentData.amountSelector = alfaPaymentData.amountSelector.replace(/ /g, '');
-    alfaPaymentData.amountSelector = alfaPaymentData.amountSelector.replace(/,/g, '.');
-    if(alfaPaymentData.amountSelector.includes('руб')) {
-        const regExp = new RegExp(/([0-9 ]+)+руб(лей|ля|ль|\.|\s\d)(\s*(\d+)+коп(еек|ейки|йка|\.|\s\d))?/g);
-        alfaPaymentData.amountSelector = alfaPaymentData.amountSelector.replace(regExp, (match, rubles, rub_ending, copecks_match, copecks) =>  {
+    alfaPaymentData.amount = alfaPaymentData.amount.replace(/ /g, '');
+    alfaPaymentData.amount = alfaPaymentData.amount.replace(/,/g, '.');
+
+    if(alfaPaymentData.amount.includes('руб')) {
+        const regExp = new RegExp(/(\d+)+руб(лей|ля|ль|\.|\d)(\d+)+коп(еек|ейки|йка|\.|\s)?/g);
+        alfaPaymentData.amount = alfaPaymentData.amount.replace(regExp, (match, rubles, rub_ending, copecks) =>  {
             return rubles + rub_ending + copecks;
         })
     }
+    alfaPaymentData.amount = Number(alfaPaymentData.amount).toFixed(2);
 
     // #covert amount by amount format
     if(alfaPaymentData.amountFormat === 'kopeyki') {
-        alfaPaymentData.amountSelector *= 100;
+        alfaPaymentData.amount *= 100;
     }
 
     const params = new URLSearchParams(alfaPaymentData).toString();
@@ -45,10 +61,3 @@ async function widgetScript() {
     const response = await request;
 }
 
-// при передачи варианта "1234.56" в рублях получим сумму "1234.56 руб.",
-//   при передачи варианта "1 234 , 56" в копейках получим сумму "1234.56 руб.",
-//   при передачи варианта "1234 руб. 56 коп." в копейках получим сумму "1234.56 руб.".
-//   Если необходимо, то можно указать в явном виде, что используется формат в рублях без указания копеек, то в этом случае нужно добавить элемент data-amount-format='rubli'. Пробелы и другие нечисловые символы система игнорирует.
-//   Например,
-//   при передачи варианта "1234" получим сумму "1234.00 руб.",
-//   при передачи варианта "1 234 руб." получим сумму "1234.00 руб.".
