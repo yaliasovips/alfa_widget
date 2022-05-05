@@ -5,50 +5,50 @@
     <title>Alfabank Widget</title>
     <script
         id="alfa-payment-script"
-        type="text/javascript"
-        src="/index.js">
+        type="module"
+        src="/scripts/index.js">
     </script>
 </head>
 <body>
 <div id="alfa-payment-button"
-     data-token='ceberf5n6df7a7ivndfu2mc0r2'
-     data-client-info-selector='.clientInfo'
-     data-amount-selector='.amount'
-     data-version='1.0'
-     data-order-number-selector='.orderNumber'
-     data-language='.language'
-     data-stages='1'
-     data-return-url='http://store.ru/success_url.html'
-     data-fail-url='http://store.ru/fail_url.html'
-     data-amount-format='.amountFormat'
-     data-description-selector='.order'
-     data-email-selector='.clientEmail'
-     data-phone-selector='.clientPhone'
+    data-token="ceberf5n6df7a7ivndfu2mc0r2"
+    data-client-info-selector=".clientInfo"
+    data-amount-selector=".amount"
+    data-version="1.0"
+    data-order-number-selector=".orderNumber"
+    data-language=".language"
+    data-stages="1"
+    data-return-url="http://store.ru/success_url.html"
+    data-fail-url="http://store.ru/fail_url.html"
+    data-amount-format=".amountFormat"
+    data-description-selector=".order"
+    data-email-selector=".clientEmail"
+    data-phone-selector=".clientPhone"
 ></div>
 
 <div class="element">
     <label>Укажите Ваше имя:</label>
-    <input class='clientInfo' type='text' value='Имя Имя Имя' />
+    <input class="clientInfo" type="text" value="Имя Имя Имя" />
 </div>
 <div class="element">
     <label>Укажите Ваш email:</label>
-    <input class='clientEmail' type='text' value='alyasovyan@gmail.com' />
+    <input class="clientEmail" type="text" value="alyasovyan@gmail.com" />
 </div>
 <div class="element">
     <label>Укажите Ваш телефон:</label>
-    <input class='clientPhone' type='text' value='+79999999999' />
+    <input class="clientPhone" type="text" value="+79999999999" />
 </div>
 <div class="element">
     <label>Укажите amount:</label>
-    <input class='amount' type='text' value='12332 руб. 43 коп.' />
+    <input class="amount" type="text" value="12332 руб. 43 коп." />
 </div>
 <div class="element">
     <label>Укажите orderNumber:</label>
-    <span class='orderNumber'>Номер заказа </span>
+    <span class="orderNumber">Номер заказа </span>
 </div>
 <div class="element">
     <label>Укажите amountFormat:</label>
-    <input class='amountFormat' type='text' value='kopeyki' />
+    <input class="amountFormat" type="text" value="kopeyki" />
 </div>
 <div class="element">
     <label>Укажите language:</label>
@@ -59,7 +59,7 @@
 </div>
 <div class="element">
     <label>Укажите order:</label>
-    <input class='order' type='text' value='order' />
+    <input class="order" type="text" value="order" />
 </div>
 </body>
 </html>
