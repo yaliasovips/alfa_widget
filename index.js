@@ -10,5 +10,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // NOT_PAYED - заказ не оплачен
 // ERROR_REQUIRE_AMOUNT - поле сумма не заполнено (amount)
-// ERROR_REQUIRE - необходимо заполнить обязательные поля
+// ERROR_REQUIRE - необходимо заполнить обязательные поля (orderNumber, amount, returnUrl)
 // ERROR_MESSAGE - оплата картой временно невозможна, обратитесь к администратору магазина

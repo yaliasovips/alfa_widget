@@ -21,8 +21,9 @@ export default async function widgetScript() {
     const { valid, errorMessages } = validation(alfaPaymentData);
 
     if(!valid) {
-        console.log('>>errorMessages', errorMessages);
-        return errorMessages;
+        const firstErrorKey = Object.keys(errorMessages)[0];
+        document.querySelector('#alfa-payment__message').innerText = errorMessages[firstErrorKey];
+        return;
     }
 
     console.log('valid');
@@ -81,10 +82,10 @@ function transformAmount(data) {
     data.amount = data.amount.replace(/,/g, '.');
 
     if (data.amount.includes('руб')) {
-        const regExp = new RegExp(/(\d+)+руб(лей|ля|ль|\.|\d|)((\d+)+коп(еек|ейки|йка|\.|\s)|)?/g);
-        data.amount = data.amount.replace(regExp, (match, rubles, rub_ending, copecks) => {
-            console.log(match, rubles, rub_ending, copecks);
-            return rubles + rub_ending + copecks;
+        const regExp = new RegExp(/(\d+)+руб(лей|ля|ль|\.|\d)((\d+)+коп(еек|ейки|йка|\.|\s)|)?/g);
+        data.amount = data.amount.replace(regExp, (match, rubles, rub_ending, copecks_match, copecks) => {
+            const copecks_end = copecks || '';
+            return rubles + '.' + copecks_end;
         })
     }
     data.amount = Number(data.amount).toFixed(2);
