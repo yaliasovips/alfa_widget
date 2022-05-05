@@ -12,16 +12,16 @@
 <body>
 <div id="alfa-payment-button"
     data-token="ceberf5n6df7a7ivndfu2mc0r2"
-    data-client-info-selector=".clientInfo"
-    data-amount-selector=".amount"
     data-version="1.0"
-    data-order-number-selector=".orderNumber"
     data-language=".language"
     data-stages="1"
     data-return-url="http://store.ru/success_url.html"
     data-fail-url="http://store.ru/fail_url.html"
     data-amount-format=".amountFormat"
+    data-amount-selector=".amount"
+    data-order-number-selector=".orderNumber"
     data-description-selector=".order"
+    data-client-info-selector=".clientInfo"
     data-email-selector=".clientEmail"
     data-phone-selector=".clientPhone"
 ></div>
@@ -45,6 +45,10 @@
 <div class="element">
     <label>Укажите orderNumber:</label>
     <span class="orderNumber">Номер заказа </span>
+</div>
+<div class="element">
+    <label>Укажите clientFio:</label>
+    <span class="clientFio">clientFio </span>
 </div>
 <div class="element">
     <label>Укажите amountFormat:</label>
