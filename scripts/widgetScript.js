@@ -3,49 +3,69 @@ export default async function widgetScript() {
     const alfaPaymentData = { ...this.dataset };
 
     // # find keys ob object, if value start with "."
-    for(const element in alfaPaymentData) {
-        if(alfaPaymentData[element].indexOf('.') === 0) {
-            const foundSelector = document.querySelector(alfaPaymentData[element]);
-            alfaPaymentData[element] = foundSelector.value || foundSelector.innerText;
-        }
-    }
+    findDataFromElements(alfaPaymentData);
+
+    alfaPaymentData['currency'] = 810;
 
     // # rename keys
-    alfaPaymentData['orderNumber'] = alfaPaymentData['orderNumberSelector'];
-    delete alfaPaymentData['orderNumberSelector'];
-    alfaPaymentData['amount'] = alfaPaymentData['amountSelector'];
-    delete alfaPaymentData['amountSelector'];
-    alfaPaymentData['description'] = alfaPaymentData['descriptionSelector'];
-    delete alfaPaymentData['descriptionSelector'];
-    alfaPaymentData['email'] = alfaPaymentData['addEmailSelector'];
-    delete alfaPaymentData['addEmailSelector'];
-    alfaPaymentData['phone'] = alfaPaymentData['addPhoneSelector'];
-    delete alfaPaymentData['addPhoneSelector'];
-    alfaPaymentData['clientInfo'] = alfaPaymentData['clientInfoSelector'];
-    delete alfaPaymentData['clientInfoSelector'];
+    renameKeys(alfaPaymentData);
+
+    console.log('>>alfaPaymentData', alfaPaymentData);
 
     // # transform amount
-    alfaPaymentData.amount = alfaPaymentData.amount.replace(/ /g, '');
-    alfaPaymentData.amount = alfaPaymentData.amount.replace(/,/g, '.');
+    transformAmount(alfaPaymentData);
 
-    if(alfaPaymentData.amount.includes('руб')) {
+    const params = new URLSearchParams(alfaPaymentData).toString();
+    console.log('>>params', params);
+
+    try {
+        const request = await fetch(`https://test.egopay.ru/api/ab/rest/?${params}`, {
+            method: 'POST',
+        })
+        const response = request.json();
+    } catch(error) {
+        console.error(error);
+    }
+}
+
+function findDataFromElements(data) {
+    for(const element in data) {
+        if(data[element].indexOf('.') === 0) {
+            const foundSelector = document.querySelector(data[element]);
+            data[element] = foundSelector.value || foundSelector.innerText;
+        }
+    }
+}
+
+function renameKeys(data) {
+    data['orderNumber'] = data['orderNumberSelector'];
+    delete data['orderNumberSelector'];
+    data['amount'] = data['amountSelector'];
+    delete data['amountSelector'];
+    data['description'] = data['descriptionSelector'];
+    delete data['descriptionSelector'];
+    data['email'] = data['emailSelector'];
+    delete data['emailSelector'];
+    data['phone'] = data['phoneSelector'];
+    delete data['phoneSelector'];
+    data['clientInfo'] = data['clientInfoSelector'];
+    delete data['clientInfoSelector'];
+}
+
+function transformAmount(data) {
+    data.amount = data.amount.replace(/ /g, '');
+    data.amount = data.amount.replace(/,/g, '.');
+
+    if(data.amount.includes('руб')) {
         const regExp = new RegExp(/(\d+)+руб(лей|ля|ль|\.|\d)(\d+)+коп(еек|ейки|йка|\.|\s)?/g);
-        alfaPaymentData.amount = alfaPaymentData.amount.replace(regExp, (match, rubles, rub_ending, copecks) =>  {
+        data.amount = data.amount.replace(regExp, (match, rubles, rub_ending, copecks) =>  {
             return rubles + rub_ending + copecks;
         })
     }
-    alfaPaymentData.amount = Number(alfaPaymentData.amount).toFixed(2);
+    data.amount = Number(data.amount).toFixed(2);
 
     // # covert amount by amount format
-    if(alfaPaymentData.amountFormat === 'kopeyki') {
-        alfaPaymentData.amount *= 100;
+    if(data.amountFormat === 'kopeyki') {
+        data.amount *= 100;
     }
-
-    const params = new URLSearchParams(alfaPaymentData).toString();
-
-    const request = await fetch(`https://test.egopay.ru/api/ab/rest/?${params}`, {
-        method: 'POST',
-    }).then(res => res.json()).then(data => console.log(data)).catch(error => console.log(error));
-    const response = await request;
 }
-
