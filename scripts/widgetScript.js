@@ -10,8 +10,8 @@ export default async function widgetScript() {
     alfaPaymentData['currency'] = 810;
 
     // # rename keys
-    // только в том случае, если у полей есть префикс -selector
-    // без него указывается не селектор, а "захардкорженные" данные
+    // # только в том случае, если у полей есть префикс -selector
+    // # без него указывается не селектор, а "захардкорженные" данные
     renameKeys(alfaPaymentData);
 
     // # transform amount
@@ -25,8 +25,6 @@ export default async function widgetScript() {
         document.querySelector('#alfa-payment__message').innerText = errorMessages[firstErrorKey];
         return;
     }
-
-    console.log('valid');
 
     // try {
     //     const request = await fetch(`https://test.egopay.ru/api/ab/rest/`, {
@@ -43,12 +41,20 @@ function validation(data) {
     let valid = true;
     const errorMessages = {};
 
-    // # сумма введена, 
-    // # сумма больше и не равна нулю
+    // # сумма не введена, 
+    // # сумма должна быть больше и не равна нулю
+    // # ERROR_REQUIRE_AMOUNT
     if(!(Number(data.amount) && Number(data.amount) > 0 && Number(data.amount) !== 0)) {
         valid = false;
         errorMessages.amountError = 'Поле сумма не заполнено';
     }
+
+    // # не пустые номер заказа, урл, сумма и токен
+    // # ERROR_REQUIRE 
+    if(!orderNumber || !returnUrl || !amount || !token) {
+        valid = false;
+        errorMessages.requireFiled = 'Необходимо заполнить обязательные поля';
+    } 
 
     return {
         valid,
@@ -95,3 +101,4 @@ function transformAmount(data) {
         data.amount *= 100;
     }
 }
+
