@@ -26,15 +26,17 @@ export default async function widgetScript() {
         return;
     }
 
-    // try {
-    //     const request = await fetch(`https://test.egopay.ru/api/ab/rest/`, {
-    //         method: 'POST',
-    //         body: JSON.stringify(alfaPaymentData),
-    //     })
-    //     const response = request.json();
-    // } catch(error) {
-    //     console.error(error);
-    // }
+    try {
+        const request = await fetch(`https://test.egopay.ru/api/ab/rest/register.do`, {
+            method: 'POST',
+            body: JSON.stringify(alfaPaymentData),
+        })
+        console.log('>>request', request);
+        const response = request.json();
+        console.log('>>response', response);
+    } catch(error) {
+        console.error(error);
+    }
 }
 
 function validation(data) {
@@ -51,7 +53,7 @@ function validation(data) {
 
     // # не пустые номер заказа, урл, сумма и токен
     // # ERROR_REQUIRE 
-    if(!orderNumber || !returnUrl || !amount || !token) {
+    if(!data.orderNumber || !data.returnUrl || !data.amount || !data.token) {
         valid = false;
         errorMessages.requireFiled = 'Необходимо заполнить обязательные поля';
     } 
