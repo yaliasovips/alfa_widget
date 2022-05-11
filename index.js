@@ -59,8 +59,6 @@ function generateElements() {
 
 	const frame = document.createElement("iframe");
 	frame.allow = "payment";
-	// frame.sandbox = 'allow-top-navigation-by-user-activation allow-same-origin allow-scripts';
-	// frame.sandbox = 'allow-scripts allow-popups allow-top-navigation';
 	frame.sandbox = 'allow-top-navigation-by-user-activation allow-same-origin allow-scripts';
 	frame.classList.add("alfa-payment__rbs-iframe", "alfa-payment__rbs-iframe_hidden");
 	frameModalBody.append(frame);
@@ -97,22 +95,26 @@ async function widgetScript() {
         return;
     }
 
-    // try {
-    //     const request = await fetch(`https://test.egopay.ru/api/ab/rest/register.do`, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify(alfaPaymentData),
-    //     })
-    //     console.log('>>request', request);
-    //     const response = request.json();
-    //     console.log('>>response', response);
-    // } catch(error) {
-    //     console.error(error);
-    // }
+    try {
+        const request = await fetch(`https://test.egopay.ru/api/ab/rest/register.do`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(alfaPaymentData),
+        })
+        const response = await request.json();
+        console.log('>>response', response);
+        if(Number(response.errorCode) === 0) {
+            const frame = document.querySelector('.alfa-payment__rbs-iframe');
+            frame.src = response.formUrl
+        } else {
+            throw new Error(response.errorMessages)
+        }
 
-    document.querySelector('.alfa-payment__rbs-iframe').src = 'https://test.egopay.ru/payments/request?session=6e5dbca36ae1460abf0a0823d7faa8c8';
+    } catch(error) {
+        console.error(error);
+    }
 }
 
 function validation(data) {
