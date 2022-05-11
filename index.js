@@ -1,7 +1,5 @@
 "use strict";
 
-import widgetScript from "./scripts/widgetScript.js";
-
 document.addEventListener('DOMContentLoaded', () => {
     const { paymentButton, paymentDataWrapper } = generateElements();
     paymentButton.onclick = widgetScript.bind(paymentDataWrapper);
