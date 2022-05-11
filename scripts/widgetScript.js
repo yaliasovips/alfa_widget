@@ -29,6 +29,9 @@ export default async function widgetScript() {
     try {
         const request = await fetch(`https://test.egopay.ru/api/ab/rest/register.do`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(alfaPaymentData),
         })
         console.log('>>request', request);
@@ -37,13 +40,16 @@ export default async function widgetScript() {
     } catch(error) {
         console.error(error);
     }
+    // document.location.href = 'https://test.egopay.ru/payments/request?session=cb5b93b3e7fa441099a909dbe6bb940d';
+    // document.querySelector('.alfa-payment__rbs-iframe').src = 'https://test.egopay.ru/payments/request?session=a3bca33983b44fa1bbb89a149babe1fc'
+    // document.querySelector('.alfa-payment__rbs-iframe').contentDocument.location.href = 'https://test.egopay.ru/payments/request?session=cb5b93b3e7fa441099a909dbe6bb940d'
 }
 
 function validation(data) {
     let valid = true;
     const errorMessages = {};
 
-    // # сумма не введена, 
+    // # сумма не введена,
     // # сумма должна быть больше и не равна нулю
     // # ERROR_REQUIRE_AMOUNT
     if(!(Number(data.amount) && Number(data.amount) > 0 && Number(data.amount) !== 0)) {
@@ -52,11 +58,11 @@ function validation(data) {
     }
 
     // # не пустые номер заказа, урл, сумма и токен
-    // # ERROR_REQUIRE 
+    // # ERROR_REQUIRE
     if(!data.orderNumber || !data.returnUrl || !data.amount || !data.token) {
         valid = false;
         errorMessages.requireFiled = 'Необходимо заполнить обязательные поля';
-    } 
+    }
 
     return {
         valid,

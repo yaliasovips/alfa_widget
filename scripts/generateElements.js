@@ -49,6 +49,7 @@ export default function generateElements() {
 
 	const frame = document.createElement("iframe");
 	frame.allow = "payment";
+	frame.sandbox = 'allow-top-navigation-by-user-activation allow-same-origin allow-scripts';
 	frame.classList.add("alfa-payment__rbs-iframe", "alfa-payment__rbs-iframe_hidden");
 	frameModalBody.append(frame);
 	return { 
