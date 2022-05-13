@@ -1,8 +1,11 @@
 "use strict";
 
 document.addEventListener('DOMContentLoaded', () => {
-    const { paymentButton, paymentDataWrapper } = generateElements();
-    paymentButton.onclick = widgetScript.bind(paymentDataWrapper);
+    const { paymentButton, paymentMessage, paymentDataWrapper, paymentModal, frameModal, frameModalCloseButton } = generateElements();
+    paymentButton.onclick = widgetScript.bind(paymentDataWrapper, paymentButton, paymentMessage, paymentModal, frameModal);
+
+    // #
+    frameModalCloseButton.addEventListener('click', (event) => closeModal(paymentButton, paymentModal, frameModal));
 })
 
 // NOT_PAYED - заказ не оплачен
@@ -16,8 +19,8 @@ function generateElements() {
 	// # generate payment button
 	const paymentButton = document.createElement("button");
 	paymentButton.id = "alfa-payment__button";
-	paymentButton.classList.add("theme_alfa-on-color", "alfa-payment__button_size_xl");
-	paymentButton.innerText = paymentDataWrapper.dataset.buttonText || 'Оплатить по карте';
+	paymentButton.classList.add("alfa-payment__button", "theme_alfa-on-color", "alfa-payment__button_size_xl");
+	paymentButton.innerText = paymentDataWrapper.dataset.buttonText || 'Оплатить картой';
 	paymentDataWrapper.append(paymentButton);
 
 	// # generate message span
@@ -61,14 +64,19 @@ function generateElements() {
 	frame.allow = "payment";
 	frame.sandbox = 'allow-top-navigation-by-user-activation allow-same-origin allow-scripts';
 	frame.classList.add("alfa-payment__rbs-iframe", "alfa-payment__rbs-iframe_hidden");
-	frameModalBody.append(frame);
+    frameModalBody.append(frame);
+    
 	return { 
-		paymentButton,
-		paymentDataWrapper,
+        paymentButton,
+        paymentMessage,
+        paymentDataWrapper,
+        paymentModal,
+        frameModal,
+        frameModalCloseButton,
 	};
 }
 
-async function widgetScript() {
+async function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frameModalCloseButton) {
     // # convert DOMStringMap to object
     const alfaPaymentData = {
         ...this.dataset
@@ -91,11 +99,17 @@ async function widgetScript() {
 
     if(!valid) {
         const firstErrorKey = Object.keys(errorMessages)[0];
-        document.querySelector('#alfa-payment__message').innerText = errorMessages[firstErrorKey];
+        paymentMessage.innerText = errorMessages[firstErrorKey];
         return;
     }
 
     try {
+        // # set disabled ti payment button - start animation
+        paymentButton.setAttribute('disabled', 'disabled')
+        // # open modal
+        paymentModal.classList.remove('alfa-payment__modal_hidden');
+        frameModal.classList.remove('alfa-payment__rbs-frame-modal_hidden');
+
         const request = await fetch(`https://test.egopay.ru/api/ab/rest/register.do`, {
             method: 'POST',
             headers: {
@@ -109,7 +123,8 @@ async function widgetScript() {
             const frame = document.querySelector('.alfa-payment__rbs-iframe');
             frame.src = response.formUrl
         } else {
-            throw new Error(response.errorMessages)
+            paymentMessage.innerText = response.errorMessages;
+            throw new Error(response.errorMessages);
         }
 
     } catch(error) {
@@ -182,3 +197,8 @@ function transformAmount(data) {
     }
 }
 
+function closeModal(paymentButton, paymentModal, frameModal) {
+    paymentButton.removeAttribute('disabled');
+    paymentModal.classList.add('alfa-payment__modal_hidden');
+    frameModal.classList.add('alfa-payment__rbs-frame-modal_hidden');
+}
