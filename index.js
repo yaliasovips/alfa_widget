@@ -1,11 +1,11 @@
 "use strict";
 
 document.addEventListener('DOMContentLoaded', () => {
-    const { paymentButton, paymentMessage, paymentDataWrapper, paymentModal, frameModal, frameModalCloseButton } = generateElements();
-    paymentButton.onclick = widgetScript.bind(paymentDataWrapper, paymentButton, paymentMessage, paymentModal, frameModal);
+    const { paymentButton, paymentMessage, paymentDataWrapper, paymentModal, frameModal, frameModalCloseButton, frame } = generateElements();
+    paymentButton.onclick = widgetScript.bind(paymentDataWrapper, paymentButton, paymentMessage, paymentModal, frameModal, frame);
 
     // #
-    frameModalCloseButton.addEventListener('click', (event) => closeModal(paymentButton, paymentModal, frameModal));
+    frameModalCloseButton.addEventListener('click', (event) => closeModal(paymentButton, paymentModal, frameModal, frame));
 })
 
 // NOT_PAYED - заказ не оплачен
@@ -62,7 +62,7 @@ function generateElements() {
 
 	const frame = document.createElement("iframe");
 	frame.allow = "payment";
-	frame.sandbox = 'allow-top-navigation-by-user-activation allow-same-origin allow-scripts';
+	frame.sandbox = 'allow-top-navigation-by-user-activation allow-popups allow-forms allow-same-origin allow-scripts';
 	frame.classList.add("alfa-payment__rbs-iframe", "alfa-payment__rbs-iframe_hidden");
     frameModalBody.append(frame);
     
@@ -73,10 +73,11 @@ function generateElements() {
         paymentModal,
         frameModal,
         frameModalCloseButton,
+        frame,
 	};
 }
 
-async function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frameModalCloseButton) {
+async function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frame) {
     // # convert DOMStringMap to object
     const alfaPaymentData = {
         ...this.dataset
@@ -104,12 +105,7 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
     }
 
     try {
-        // # set disabled ti payment button - start animation
-        paymentButton.setAttribute('disabled', 'disabled')
-        // # open modal
-        paymentModal.classList.remove('alfa-payment__modal_hidden');
-        frameModal.classList.remove('alfa-payment__rbs-frame-modal_hidden');
-
+        openModal(paymentButton, paymentModal, frameModal, frame);
         const request = await fetch(`https://test.egopay.ru/api/ab/rest/register.do`, {
             method: 'POST',
             headers: {
@@ -197,8 +193,16 @@ function transformAmount(data) {
     }
 }
 
-function closeModal(paymentButton, paymentModal, frameModal) {
+function openModal(paymentButton, paymentModal, frameModal, frame) {
+    paymentButton.setAttribute('disabled', 'disabled')
+    paymentModal.classList.remove('alfa-payment__modal_hidden');
+    frameModal.classList.remove('alfa-payment__rbs-frame-modal_hidden');
+    frame.classList.remove('alfa-payment__rbs-iframe_hidden');
+}
+
+function closeModal(paymentButton, paymentModal, frameModal, frame) {
     paymentButton.removeAttribute('disabled');
     paymentModal.classList.add('alfa-payment__modal_hidden');
     frameModal.classList.add('alfa-payment__rbs-frame-modal_hidden');
+    frame.classList.add('alfa-payment__rbs-iframe_hidden');
 }
