@@ -2,85 +2,88 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const {
-      paymentButton,
-      paymentMessage,
-      paymentDataWrapper,
-      paymentModal,
-      frameModal,
-      frameModalCloseButton,
-      frame
+        paymentButton,
+        paymentMessage,
+        paymentDataWrapper,
+        paymentModal,
+        frameModal,
+        frameModalCloseButton,
+        frame
     } = generateElements();
 
     paymentButton.onclick = widgetScript.bind(
-      paymentDataWrapper,
-      paymentButton,
-      paymentMessage,
-      paymentModal,
-      frameModal,
-      frameModalCloseButton,
-      frame
+        paymentDataWrapper,
+        paymentButton,
+        paymentMessage,
+        paymentModal,
+        frameModal,
+        frameModalCloseButton,
+        frame
     );
 })
 
-// NOT_PAYED - заказ не оплачен
-// ERROR_MESSAGE - оплата картой временно невозможна, обратитесь к администратору магазина
-
 function generateElements() {
-	// # find widget <button>
-	const paymentDataWrapper = document.getElementById('alfa-payment-button');
-	const body = document.body;
+	  // # find widget <button>
+	  const paymentDataWrapper = document.getElementById('alfa-payment-button');
+	  const body = document.body;
+    const head = document.head;
 
-	// # generate payment button
-	const paymentButton = document.createElement('button');
-	paymentButton.id = 'alfa-payment__button';
-	paymentButton.classList.add('alfa-payment__button', 'theme_alfa-on-color', 'alfa-payment__button_size_xl');
-	paymentButton.innerText = paymentDataWrapper.dataset.buttonText || 'Оплатить картой';
-	paymentDataWrapper.append(paymentButton);
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = './index.css';
+    head.append(stylesheet);
 
-	// # generate message span
-	const paymentMessage = document.createElement('span');
-	paymentMessage.id = 'alfa-payment__message';
-	paymentMessage.classList.add('alfa-payment__message');
-	paymentDataWrapper.append(paymentMessage);
+	  // # generate payment button
+	  const paymentButton = document.createElement('button');
+	  paymentButton.id = 'alfa-payment__button';
+	  paymentButton.classList.add('alfa-payment__button', 'theme_alfa-on-color', 'alfa-payment__button_size_xl');
+	  paymentButton.innerText = paymentDataWrapper.dataset.buttonText || 'Оплатить картой';
+	  paymentDataWrapper.append(paymentButton);
 
-	// # generate payment modal
-	const paymentModal = document.createElement('div');
-	paymentModal.classList.add('alfa-payment__modal', 'alfa-payment__modal_hidden');
-	body.append(paymentModal);
+	  // # generate message span
+	  const paymentMessage = document.createElement('span');
+	  paymentMessage.id = 'alfa-payment__message';
+	  paymentMessage.classList.add('alfa-payment__message');
+	  paymentDataWrapper.append(paymentMessage);
 
-	// # generate frame modal
-	const frameModal = document.createElement('div');
-	frameModal.id = 'alfa-payment';
-	frameModal.classList.add('alfa-payment__rbs-frame-modal', 'alfa-payment__rbs-frame-modal_hidden');
-	body.append(frameModal);
+	  // # generate payment modal
+	  const paymentModal = document.createElement('div');
+	  paymentModal.classList.add('alfa-payment__modal', 'alfa-payment__modal_hidden');
+	  body.append(paymentModal);
 
-	// # generate frame modal header
-	const frameModalHeader = document.createElement('div');
-	frameModalHeader.classList.add('alfa-payment__rbs-frame-header');
-	frameModal.append(frameModalHeader);
+	  // # generate frame modal
+	  const frameModal = document.createElement('div');
+	  frameModal.id = 'alfa-payment';
+	  frameModal.classList.add('alfa-payment__rbs-frame-modal', 'alfa-payment__rbs-frame-modal_hidden');
+	  body.append(frameModal);
 
-	// # generate close button in frame modal header
-	const frameModalCloseButton = document.createElement('span');
-	frameModalCloseButton.classList.add('alfa-payment__payment-close-button');
-	frameModalHeader.append(frameModalCloseButton);
+	  // # generate frame modal header
+	  const frameModalHeader = document.createElement('div');
+	  frameModalHeader.classList.add('alfa-payment__rbs-frame-header');
+	  frameModal.append(frameModalHeader);
 
-	// # generate frame modal body
-	const frameModalBody = document.createElement('div');
-	frameModalBody.classList.add('alfa-payment__rbs-frame-body')
-	frameModal.append(frameModalBody);
+	  // # generate close button in frame modal header
+	  const frameModalCloseButton = document.createElement('span');
+	  frameModalCloseButton.classList.add('alfa-payment__payment-close-button');
+	  frameModalHeader.append(frameModalCloseButton);
 
-	// # generate frame spinner
-	const frameModalSpinner = document.createElement('div');
-	frameModalSpinner.classList.add('alfa-payment__spinner');
-	frameModalBody.append(frameModalSpinner);
+	  // # generate frame modal body
+	  const frameModalBody = document.createElement('div');
+	  frameModalBody.classList.add('alfa-payment__rbs-frame-body')
+	  frameModal.append(frameModalBody);
 
-	const frame = document.createElement('iframe');
-	frame.allow = 'payment';
-	frame.sandbox = 'allow-popups allow-forms allow-same-origin allow-scripts';
-	frame.classList.add('alfa-payment__rbs-iframe', 'alfa-payment__rbs-iframe_hidden');
+	  // # generate frame spinner
+	  const frameModalSpinner = document.createElement('div');
+	  frameModalSpinner.classList.add('alfa-payment__spinner');
+	  frameModalBody.append(frameModalSpinner);
+
+	  const frame = document.createElement('iframe');
+	  frame.allow = 'payment';
+	  frame.sandbox = 'allow-popups allow-forms allow-same-origin allow-scripts';
+	  frame.classList.add('alfa-payment__rbs-iframe', 'alfa-payment__rbs-iframe_hidden');
     frameModalBody.append(frame);
 
-	return {
+    return {
         paymentButton,
         paymentMessage,
         paymentDataWrapper,
@@ -88,7 +91,7 @@ function generateElements() {
         frameModal,
         frameModalCloseButton,
         frame,
-	};
+    };
 }
 
 async function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frameModalCloseButton, frame) {
@@ -109,7 +112,7 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
     renameKeys(alfaPaymentData);
 
     // # transform amount
-    transformAmount(alfaPaymentData);
+    if(alfaPaymentData.amount) transformAmount(alfaPaymentData);
 
     const { valid, errorMessages } = validation(alfaPaymentData);
     // # array of modal elements
@@ -117,8 +120,14 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
     // # orderID for get status request
     let orderID;
 
+    function checkData() {
+      const firstErrorKey = Object.keys(errorMessages)[0];
+      throw new Error(errorMessages[firstErrorKey]);
+    }
+
     try {
         if(!valid) {
+            // checkData()
             const firstErrorKey = Object.keys(errorMessages)[0];
             throw new Error(errorMessages[firstErrorKey]);
         }
@@ -131,7 +140,6 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
         } else {
             throw new Error(response.errorMessage);
         }
-
     } catch(error) {
         paymentMessage.style.color = 'red';
         paymentMessage.innerText = error.message;
@@ -253,12 +261,12 @@ function closeModal([paymentButton, paymentMessage, paymentModal, frameModal, fr
 }
 
 async function backendRequest(url, data) {
-  const request = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  })
-  return await request.json();
+    const request = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    return await request.json();
 }
