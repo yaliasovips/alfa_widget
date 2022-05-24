@@ -65,8 +65,8 @@ function generateElements() {
 	frame.sandbox = 'allow-popups allow-forms allow-same-origin allow-scripts';
 	frame.classList.add('alfa-payment__rbs-iframe', 'alfa-payment__rbs-iframe_hidden');
     frameModalBody.append(frame);
-    
-	return { 
+
+	return {
         paymentButton,
         paymentMessage,
         paymentDataWrapper,
@@ -77,7 +77,7 @@ function generateElements() {
 	};
 }
 
-function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frame) {
+async function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frame) {
     // # convert DOMStringMap to object
     const alfaPaymentData = {
         ...this.dataset
@@ -113,7 +113,7 @@ function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, f
             body: JSON.stringify(alfaPaymentData),
         })
         const response = await request.json();
-        
+
         if(Number(response.errorCode) === 0) {
             openModal(paymentButton, paymentMessage, paymentModal, frameModal, frame);
             frame.src = response.formUrl;
@@ -122,7 +122,7 @@ function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, f
         }
 
     } catch(error) {
-        paymentMessage.style.color = 'red'; 
+        paymentMessage.style.color = 'red';
         paymentMessage.innerText = response.errorMessage;
         console.error(error);
     }
@@ -206,7 +206,7 @@ function getStatus() {
 }
 
 function closeModal(paymentButton, paymentMessage, paymentModal, frameModal, frame) {
-    // # get status request 
+    // # get status request
     const statusMessage = getStatus();
     paymentMessage.style.color = 'green';
     paymentMessage.innerText = statusMessage;
