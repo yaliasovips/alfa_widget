@@ -112,7 +112,10 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
     transformAmount(alfaPaymentData);
 
     const { valid, errorMessages } = validation(alfaPaymentData);
+    // # array of modal elements
     const modalElements = [paymentButton, paymentMessage, paymentModal, frameModal, frame];
+    // # orderID for get status request
+    let orderID;
 
     try {
         if(!valid) {
@@ -120,10 +123,11 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
             throw new Error(errorMessages[firstErrorKey]);
         }
         // # register request
-        const response = await backendRequest('https://test.egopay.ru/api/ab/rest/register.do', alfaPaymentData);
+        const response = await postBackendRequest('https://test.egopay.ru/api/ab/rest/register.do', alfaPaymentData);
         if(Number(response.errorCode) === 0) {
             openModal([...modalElements]);
             frame.src = response.formUrl;
+            orderID = response.orderId;
         } else {
             throw new Error(response.errorMessage);
         }
@@ -134,7 +138,7 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
         console.error(error.message);
     }
 
-    frameModalCloseButton.addEventListener('click', () => getStatus(alfaPaymentData, modalElements));
+    frameModalCloseButton.addEventListener('click', () => getStatus(alfaPaymentData.language, orderID, modalElements));
 }
 
 function validation(data) {
@@ -210,18 +214,19 @@ function openModal([paymentButton, paymentMessage, paymentModal, frameModal, fra
     frame.classList.remove('alfa-payment__rbs-iframe_hidden');
 }
 
-async function getStatus(alfaPaymentData, modalElements) {
+async function getStatus(language, orderID, modalElements) {
     // # generate request data (orderNumber, language, ...)
     const statusRequestData = {};
-    statusRequestData.orderNumber = alfaPaymentData.orderNumber;
-    statusRequestData.language = alfaPaymentData.language;
-
+    statusRequestData.orderId = orderID;
+    statusRequestData.language = language;
+    const requestParams = encodeQueryData(statusRequestData);
+    //
     let statusMessage;
     let statusMessageTextColor;
 
     try {
         // # get status request
-        const response = backendRequest('https://test.egopay.ru/api/ab/widget/status', statusRequestData)
+        const response = getBackendRequest('https://test.egopay.ru/api/ab/widget/status?' + requestParams)
         if(Number(response.errorCode) === 0) {
           statusMessage = response.OrderStatus;
           statusMessageTextColor = 'green';
@@ -246,7 +251,7 @@ function closeModal([paymentButton, paymentMessage, paymentModal, frameModal, fr
     frame.classList.add('alfa-payment__rbs-iframe_hidden');
 }
 
-async function backendRequest(url, data) {
+async function postBackendRequest(url, data) {
   const request = await fetch(url, {
     method: 'POST',
     headers: {
@@ -255,4 +260,21 @@ async function backendRequest(url, data) {
     body: JSON.stringify(data),
   })
   return await request.json();
+}
+
+async function getBackendRequest(url) {
+  const request = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  return await request.json();
+}
+
+function encodeQueryData(data) {
+  const ret = [];
+  for (let d in data)
+    ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
+  return ret.join('&');
 }
