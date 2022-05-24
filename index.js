@@ -1,11 +1,25 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const { paymentButton, paymentMessage, paymentDataWrapper, paymentModal, frameModal, frameModalCloseButton, frame } = generateElements();
-    paymentButton.onclick = widgetScript.bind(paymentDataWrapper, paymentButton, paymentMessage, paymentModal, frameModal, frame);
+    const {
+      paymentButton,
+      paymentMessage,
+      paymentDataWrapper,
+      paymentModal,
+      frameModal,
+      frameModalCloseButton,
+      frame
+    } = generateElements();
 
-    // # closeModal запускаем только после получаения статуса
-    frameModalCloseButton.addEventListener('click', () => closeModal(paymentButton, paymentMessage, paymentModal, frameModal, frame));
+    paymentButton.onclick = widgetScript.bind(
+      paymentDataWrapper,
+      paymentButton,
+      paymentMessage,
+      paymentModal,
+      frameModal,
+      frameModalCloseButton,
+      frame
+    );
 })
 
 // NOT_PAYED - заказ не оплачен
@@ -77,7 +91,7 @@ function generateElements() {
 	};
 }
 
-async function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frame) {
+async function widgetScript(paymentButton, paymentMessage, paymentModal, frameModal, frameModalCloseButton, frame) {
     // # convert DOMStringMap to object
     const alfaPaymentData = {
         ...this.dataset
@@ -98,24 +112,17 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
     transformAmount(alfaPaymentData);
 
     const { valid, errorMessages } = validation(alfaPaymentData);
+    const modalElements = [paymentButton, paymentMessage, paymentModal, frameModal, frame];
 
     try {
         if(!valid) {
             const firstErrorKey = Object.keys(errorMessages)[0];
             throw new Error(errorMessages[firstErrorKey]);
         }
-
-        const request = await fetch(`https://test.egopay.ru/api/ab/rest/register.do`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(alfaPaymentData),
-        })
-        const response = await request.json();
-
+        // # register request
+        const response = await backendRequest('https://test.egopay.ru/api/ab/rest/register.do', alfaPaymentData);
         if(Number(response.errorCode) === 0) {
-            openModal(paymentButton, paymentMessage, paymentModal, frameModal, frame);
+            openModal([...modalElements]);
             frame.src = response.formUrl;
         } else {
             throw new Error(response.errorMessage);
@@ -123,9 +130,11 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
 
     } catch(error) {
         paymentMessage.style.color = 'red';
-        paymentMessage.innerText = response.errorMessage;
-        console.error(error);
+        paymentMessage.innerText = error.message;
+        console.error(error.message);
     }
+
+    frameModalCloseButton.addEventListener('click', () => getStatus(alfaPaymentData, modalElements));
 }
 
 function validation(data) {
@@ -193,7 +202,7 @@ function transformAmount(data) {
     }
 }
 
-function openModal(paymentButton, paymentMessage, paymentModal, frameModal, frame) {
+function openModal([paymentButton, paymentMessage, paymentModal, frameModal, frame]) {
     paymentButton.setAttribute('disabled', 'disabled');
     paymentMessage.innerText = '';
     paymentModal.classList.remove('alfa-payment__modal_hidden');
@@ -201,17 +210,49 @@ function openModal(paymentButton, paymentMessage, paymentModal, frameModal, fram
     frame.classList.remove('alfa-payment__rbs-iframe_hidden');
 }
 
-function getStatus() {
-    return 'Успешная оплата заказа';
+async function getStatus(alfaPaymentData, modalElements) {
+    // # generate request data (orderNumber, language, ...)
+    const statusRequestData = {};
+    statusRequestData.orderNumber = alfaPaymentData.orderNumber;
+    statusRequestData.language = alfaPaymentData.language;
+
+    let statusMessage;
+    let statusMessageTextColor;
+
+    try {
+        // # get status request
+        const response = backendRequest('https://test.egopay.ru/api/ab/widget/status', statusRequestData)
+        if(Number(response.errorCode) === 0) {
+          statusMessage = response.OrderStatus;
+          statusMessageTextColor = 'green';
+        } else {
+          throw new Error(response.errorMessage)
+        }
+    } catch(error) {
+        statusMessageTextColor = 'red';
+        statusMessage = error.message;
+        console.error('>>error', error);
+    }
+    // # closeModal запускаем только после получаения статуса
+    closeModal([...modalElements], statusMessage, statusMessageTextColor)
 }
 
-function closeModal(paymentButton, paymentMessage, paymentModal, frameModal, frame) {
-    // # get status request
-    const statusMessage = getStatus();
-    paymentMessage.style.color = 'green';
+function closeModal([paymentButton, paymentMessage, paymentModal, frameModal, frame], statusMessage, statusMessageTextColor) {
+    paymentMessage.style.color = statusMessageTextColor;
     paymentMessage.innerText = statusMessage;
     paymentButton.removeAttribute('disabled');
     paymentModal.classList.add('alfa-payment__modal_hidden');
     frameModal.classList.add('alfa-payment__rbs-frame-modal_hidden');
     frame.classList.add('alfa-payment__rbs-iframe_hidden');
+}
+
+async function backendRequest(url, data) {
+  const request = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+  return await request.json();
 }
