@@ -218,7 +218,7 @@ async function getStatus(language, orderID, modalElements) {
     // # generate request data (orderNumber, language, ...)
     const statusRequestData = {};
     statusRequestData.orderId = orderID;
-    statusRequestData.language = language;
+    statusRequestData.language = language || 'ru';
     const requestParams = encodeQueryData(statusRequestData);
     //
     let statusMessage;
@@ -249,6 +249,7 @@ function closeModal([paymentButton, paymentMessage, paymentModal, frameModal, fr
     paymentModal.classList.add('alfa-payment__modal_hidden');
     frameModal.classList.add('alfa-payment__rbs-frame-modal_hidden');
     frame.classList.add('alfa-payment__rbs-iframe_hidden');
+    frame.src = '';
 }
 
 async function postBackendRequest(url, data) {
