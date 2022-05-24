@@ -123,7 +123,7 @@ async function widgetScript(paymentButton, paymentMessage, paymentModal, frameMo
             throw new Error(errorMessages[firstErrorKey]);
         }
         // # register request
-        const response = await postBackendRequest('https://test.egopay.ru/api/ab/rest/register.do', alfaPaymentData);
+        const response = await backendRequest('https://test.egopay.ru/api/ab/rest/register.do', alfaPaymentData);
         if(Number(response.errorCode) === 0) {
             openModal([...modalElements]);
             frame.src = response.formUrl;
@@ -219,27 +219,27 @@ async function getStatus(language, orderID, modalElements) {
     const statusRequestData = {};
     statusRequestData.orderId = orderID;
     statusRequestData.language = language || 'ru';
-    const requestParams = encodeQueryData(statusRequestData);
-    //
+    // # status data
     let statusMessage;
     let statusMessageTextColor;
 
     try {
         // # get status request
-        const response = getBackendRequest('https://test.egopay.ru/api/ab/widget/status?' + requestParams)
-        if(Number(response.errorCode) === 0) {
-          statusMessage = response.OrderStatus;
+        const response = await backendRequest('https://test.egopay.ru/api/ab/widget/status', statusRequestData)
+        if(Number(response.orderStatus) === 2) {
+          statusMessage = response.message;
           statusMessageTextColor = 'green';
         } else {
-          throw new Error(response.errorMessage)
+          throw new Error(response.message)
         }
     } catch(error) {
         statusMessageTextColor = 'red';
         statusMessage = error.message;
         console.error('>>error', error);
+    } finally {
+      // # closeModal запускаем только после получаения статуса
+      closeModal([...modalElements], statusMessage, statusMessageTextColor)
     }
-    // # closeModal запускаем только после получаения статуса
-    closeModal([...modalElements], statusMessage, statusMessageTextColor)
 }
 
 function closeModal([paymentButton, paymentMessage, paymentModal, frameModal, frame], statusMessage, statusMessageTextColor) {
@@ -252,7 +252,7 @@ function closeModal([paymentButton, paymentMessage, paymentModal, frameModal, fr
     frame.src = '';
 }
 
-async function postBackendRequest(url, data) {
+async function backendRequest(url, data) {
   const request = await fetch(url, {
     method: 'POST',
     headers: {
@@ -261,21 +261,4 @@ async function postBackendRequest(url, data) {
     body: JSON.stringify(data),
   })
   return await request.json();
-}
-
-async function getBackendRequest(url) {
-  const request = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-  return await request.json();
-}
-
-function encodeQueryData(data) {
-  const ret = [];
-  for (let d in data)
-    ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
-  return ret.join('&');
 }
